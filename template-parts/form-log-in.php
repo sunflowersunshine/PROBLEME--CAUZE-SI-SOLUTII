@@ -1,6 +1,6 @@
 <?php
     // ob_start();
-    // if (!is_user_logged_in()) {
+    if (!is_user_logged_in()) {
 
 global $errors_login;
 if (!empty($errors_login)) : ?>
@@ -62,6 +62,6 @@ if (!empty($errors_login)) : ?>
     </div>  
 </div>     
 <?php
-// } else {
-//     echo '<p class="error-logged">You are already logged in.</p>';
-// }
+} else {
+    echo '<p class="error-logged">You are already logged in.</p>';
+}

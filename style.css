@@ -717,7 +717,7 @@ input::-webkit-inner-spin-button {
     background-color: #0a4316;
 }
 
-/* START- modal changes */
+/* START- modal window changes */
 .modal {
     text-align: center;
   }
@@ -735,7 +735,74 @@ input::-webkit-inner-spin-button {
     vertical-align: middle;
   }
 /* STOP- modal changes */
-  
+
+/* CONTUL MEU - START */
+
+.my_account .tm-tab-content-text {
+    margin-left: 0;
+}
+
+#user_posts {
+    width: 100%;
+    /* display: flex;
+    justify-content: center; */
+}
+
+#user_posts .btn {
+    margin: 20px !important;
+    /* padding: 4px; */
+}
+
+#user_posts td, #user_posts th {
+  border: 1px solid #ddd;
+  padding: 5px;
+  text-align: center;
+}
+
+#user_posts td {
+    font-size: 16px;
+    font-weight: 400;
+}
+
+#user_posts tr:nth-child(even){background-color: #f2f2f2;}
+
+#user_posts tr:hover {background-color: rgb(233, 229, 229);}
+
+#user_posts th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: center;
+  background-color: #0275d8;
+  color: white;
+  font-weight: 200;
+}
+
+.delete_post  {
+   display: flex;
+   align-items: center;
+}
+
+.delete_post span {
+    font-size: 12px !important;
+    color:#fff;
+}
+
+.delete_post i {
+    color: #fff;
+    margin-right: 3px;
+}
+
+.box-delete a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.view_post {
+    font-size: 13px !important;
+    padding: 0px 20px;
+}
+/* CONTUL MEU - END */
 
 /* POST TYPE - problema */
 .slick-prev:before,

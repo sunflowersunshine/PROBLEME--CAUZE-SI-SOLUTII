@@ -205,7 +205,6 @@
                 },
                 success: function (response) {
 
-
                     let data = JSON.parse(response);
 
                     if (data.type === "success") {

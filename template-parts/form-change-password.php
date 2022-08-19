@@ -1,23 +1,19 @@
-<?php
-
-if (!is_user_logged_in()) {
-   ?>
-
+<?php if (!is_user_logged_in()) { ?>
     <div class="account-container">
         <div class="account-form">
             <div class="row">
                 <?php if(isset($_GET['errors'])): ?>
-                            <div class="alert alert-danger" role="alert">
-                            <?php for($i = 0 ; $i < $_GET['errors'] ; $i++) : ?>
-                                <?php echo $_GET[$i]; ?> <br>
-                                <?php endfor; ?>
-                            </div>
+                        <div class="alert alert-danger" role="alert">
+                        <?php for($i = 0 ; $i < $_GET['errors'] ; $i++) : ?>
+                            <?php echo $_GET[$i];?> <br>
+                            <?php endfor; ?>
+                        </div>
                 <?php endif; ?>
             </div>
 
             <div class="row">
                 <div class="col-md-12">
-                        <h3 class="card-title">Înregistrare</h3>
+                        <h3 class="card-title">Schimbare parola</h3>
                         <div class="card-text">
                         <form method="POST" action="<?php echo esc_url(admin_url( 'admin-post.php' )); ?>" class="wc-register-form">
                             <input type="hidden" name="action" value="user_register" />
@@ -35,7 +31,7 @@ if (!is_user_logged_in()) {
 
                                 <!-- Last Name input -->
                                 <div class="form-group log_user">
-                                   <?php $last_name = isset($_POST['sign-up_last-name']) ? $_POST['sign-up_last-name'] : ''; ?>
+                                    <?php $last_name = isset($_POST['sign-up_last-name']) ? $_POST['sign-up_last-name'] : ''; ?>
                                     <input type="text" 
                                     class="form-control" 
                                     id="sign-up_last-name" 
@@ -66,17 +62,6 @@ if (!is_user_logged_in()) {
                                     placeholder="Telefon">
                                 </div>
 
-                                  <!-- Adress input -->
-                                  <div class="form-group log_user">
-                                    <?php $user_adress = isset($_POST['sign-up_adress']) ? $_POST['sign-up_adress'] : ''; ?>
-                                    <input type="text" 
-                                    class="form-control" 
-                                    id="sign-up_adress" 
-                                    name="sign-up_adress" 
-                                    value="<?= $user_adress; ?>" 
-                                    placeholder="Adresă">
-                                </div>
-
                                 <div class="form-group log_pass">
                                     <input type="password" class="form-control form-control-sm" id="sign-up_password" name="sign-up_password" placeholder="Parolă">
                                 </div>
@@ -94,10 +79,10 @@ if (!is_user_logged_in()) {
                                 <!-- Button create account -->
                                 <div class="log_user">
                                 <?php wp_nonce_field('userRegister', 'nonce'); ?>
-                                     <button type="submit" id="sign-up_button" name="sign-up_button" class="btn btn-primary btn-block">Creează cont</button>
+                                        <button type="submit" id="sign-up_button" name="sign-up_button" class="btn btn-primary btn-block">Creează cont</button>
                                 </div>
                                 <div class="sign-up">
-                                    Ai deja un cont? <a href="<?= get_permalink( get_page_by_title( 'Autentificare' ) ); ?>">Conectează-te</a>
+                                    Ai deja un cont? <a href="#">Conectează-te</a>
                                 </div>
                             </form>
                         </div>

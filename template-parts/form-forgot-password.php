@@ -1,6 +1,4 @@
-<?php
-
-// if (!is_user_logged_in()) : ?>
+<?php if (!is_user_logged_in()) { ?>
     <div class="account-container">
         <div class="account-form">
             <div class="row">
@@ -47,6 +45,6 @@
         </div>
     </div>
         <?php
-    // } else {
-    //     echo '<p class="error-logged">You are already logged in.</p>';
-    // }
+    } else {
+        echo '<p class="error-logged">You are already logged in.</p>';
+    }

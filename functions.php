@@ -205,10 +205,8 @@ function validate_form_trimite_problema() {
  */
  function probleme_create_user($username, $name, $email, $phone, $password, $adress) {
 
-  if(!email_exists($email)) {
-
     $find_unique_username =  false;
-    $account_trimite_problema= true;
+    $account_trimite_problema= false;
     $username_unique = $username;
 
     for($i=0; !$find_unique_username; $i++) {
@@ -217,10 +215,9 @@ function validate_form_trimite_problema() {
       } else {
           $username_unique = $username . $i;
       }
-
     }
 
-  if(!$password) {
+  if($password == false) {
     $password = wp_generate_password();
     $account_trimite_problema = true;
   }
@@ -258,8 +255,6 @@ function validate_form_trimite_problema() {
       do_action('wp_login', $username_unique);
     }
     return $user_id; 
-  }
-  die;
  }
 
  /**
@@ -278,7 +273,6 @@ function user_login_function() {
 
       $user_email = $_POST['login_email'];
       $user_password = $_POST['login_password'];
-
 
       if ( empty($user_email) && !empty($user_password) ) {
 
@@ -479,6 +473,22 @@ function user_recover_password() {
     }
 }
 
+add_action( 'admin_post_delete_user', 'delete_user' );
+
+ function delete_user() {
+ if ( !current_user_can( 'manage_options' ) ) {
+      if (isset($_POST['delete_account_button']) && wp_verify_nonce($_POST['nonce'], 'userDelete')) {
+        $current_user = wp_get_current_user();
+        wp_delete_user( $current_user->ID );
+        wp_redirect(home_url());
+        exit;
+    }
+}
+  wp_redirect(wp_get_referer());
+  exit;
+ }
+
+
  /**
   * STOP -- VALIDATE FORMS
   */
@@ -510,18 +520,23 @@ function insert_custom_problem() {
               'post_status' => 'publish',
             );
 
-            if(!is_user_logged_in()) {
+            if(!is_user_logged_in() &&  !email_exists($_POST['problema_mail'])) {
                 $user_login = $_POST['problema_name'] . $_POST['problema_last_name'];
                 $user_name = $_POST['problema_name'] . ' ' . $_POST['problema_last_name'];
                 $user_mail = $_POST['problema_mail'];
                 $user_phone = $_POST['problema_phone'];
                 $user_adress = $_POST['problema_address'];
-                $user_id =  problema_create_user($user_login, $user_name , $user_mail, $user_phone, 0,  $user_adress);
+                $user_id =  problema_create_user($user_login, $user_name , $user_mail, $user_phone, false,  $user_adress);
 
                 if($user_id) {
                     $post_data['post_author'] = $user_id;
                 }
             }
+             else {
+              $user = get_user_by( 'email', $_POST['problema_mail'] );
+              $user_id = $user->ID;
+              $post_data['post_author'] = $user_id;
+             }
             
             $response = array(); // create response array
     
@@ -927,3 +942,42 @@ function gutenberg_filter( $use_block_editor, $post_type ) {
 }
 add_filter( 'use_block_editor_for_post_type', 'gutenberg_filter', 10, 2 );
 
+
+/**
+ * Remove admin bar for users that is not administrator
+ */
+
+add_action('after_setup_theme', 'remove_admin_bar');
+function remove_admin_bar() {
+if (!current_user_can('administrator') && !is_admin()) {
+  show_admin_bar(false);
+}
+}
+
+
+
+/**
+ * Show number of views
+ */
+function get_post_views($postID){
+  $count = get_post_meta($postID, 'post_views_count', true);
+  if($count==''){
+      delete_post_meta($postID, 'post_views_count');
+      add_post_meta($postID, 'post_views_count', '0');
+      return "0";
+  }
+  return $count;
+}
+
+function set_post_views($postID) {
+  $count = get_post_meta($postID, 'post_views_count', true);
+  if($count==''){
+      $count = 0;
+      delete_post_meta($postID, 'post_views_count');
+      add_post_meta($postID, 'post_views_count', '0');
+  } else {
+      $count++;
+      update_post_meta($postID, 'post_views_count', $count);
+  }
+}
+remove_action( 'wp_head', 'adjacent_posts_rel_link_wp_head', 10, 0);
