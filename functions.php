@@ -208,6 +208,7 @@ function validate_form_trimite_problema() {
     $find_unique_username =  false;
     $account_trimite_problema= false;
     $username_unique = $username;
+    $full_name = explode(" ", $name);
 
     for($i=0; !$find_unique_username; $i++) {
       if(!username_exists($username_unique)) {
@@ -225,7 +226,11 @@ function validate_form_trimite_problema() {
   $userdata = array(
       'user_login' =>   $username_unique,
       'user_pass' => wp_hash_password( $password ),
+      'first_name' =>  $full_name[0],
+      'last_name' => $full_name[1],
+      'display_name' => $name,
       'user_email' => $email,
+      'role' => 'author',
       'meta_input' => array(
         'phone' => $phone,
         'adress' => $adress,
@@ -256,6 +261,15 @@ function validate_form_trimite_problema() {
     }
     return $user_id; 
  }
+
+ /**
+  *  add USER capabalities to detele posts
+  */
+function add_theme_caps() {
+  $role = get_role( 'author' );
+  $role->add_cap('delete_post');
+}
+add_action( 'admin_init', 'add_theme_caps');
 
  /**
   * Login form function
@@ -300,6 +314,7 @@ function user_login_function() {
         $credentials['user_login'] =  $user_email;
         $credentials['user_password'] =  $user_password;
         $credentials['remember'] = true;
+        $user = get_user_by( 'email', $user_email );
 
         $user = wp_signon($credentials, false);
         if (is_wp_error($user)) {
@@ -310,6 +325,7 @@ function user_login_function() {
           wp_redirect($args);
           exit;
         } else {
+            wp_set_auth_cookie($user->ID);
             wp_redirect(get_permalink( get_page_by_title( 'Contul meu' ) ));
             exit;
         }
@@ -479,6 +495,16 @@ add_action( 'admin_post_delete_user', 'delete_user' );
  if ( !current_user_can( 'manage_options' ) ) {
       if (isset($_POST['delete_account_button']) && wp_verify_nonce($_POST['nonce'], 'userDelete')) {
         $current_user = wp_get_current_user();
+        $args = array (
+          'numberposts' => -1,
+          'post_type' => 'any',
+          'author' => $current_user->ID
+      );
+      $user_posts = get_posts($args);
+
+      foreach ($user_posts as $user_post) {
+        wp_delete_post($user_post->ID, true);
+    }
         wp_delete_user( $current_user->ID );
         wp_redirect(home_url());
         exit;
@@ -487,7 +513,6 @@ add_action( 'admin_post_delete_user', 'delete_user' );
   wp_redirect(wp_get_referer());
   exit;
  }
-
 
  /**
   * STOP -- VALIDATE FORMS
@@ -818,7 +843,6 @@ function problema_posts_columns( $columns ) {
 }
 
 
-
 add_action( 'manage_problema_posts_custom_column', 'problema_columns', 10, 2);
 function problema_columns( $column, $post_id ) {
 
@@ -837,7 +861,6 @@ function problema_columns( $column, $post_id ) {
     echo $favorite  ;
   }
 }
-
 
 /**
  * Order comments fields - mame, email website, comment
@@ -953,7 +976,6 @@ if (!current_user_can('administrator') && !is_admin()) {
   show_admin_bar(false);
 }
 }
-
 
 
 /**

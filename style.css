@@ -704,6 +704,14 @@ input::-webkit-inner-spin-button {
     left:-50px;
 }
 
+.button-account__red {
+    background-color: #d84641;
+    right:-60px;
+}
+.button-account__red:hover {
+    background-color: #dc201a;
+}
+
 .button-account__blue:hover {
     background-color: #093f76;
 }
@@ -735,6 +743,8 @@ input::-webkit-inner-spin-button {
     vertical-align: middle;
   }
 /* STOP- modal changes */
+
+
 
 /* CONTUL MEU - START */
 
@@ -801,6 +811,45 @@ input::-webkit-inner-spin-button {
 .view_post {
     font-size: 13px !important;
     padding: 0px 20px;
+}
+
+ /* Personal data */
+.panel-title {
+    margin-bottom: 25px !important;
+}
+.table-user-information td input {
+    outline: none;
+    border: none !important;
+    width: 50%;
+    position: absolute;
+    left: 40%;
+}
+
+.table-user-information .focus-border {
+    border-bottom: 1px solid rgb(30, 149, 88) !important;
+}
+
+.table-user-information td input[type=text]:disabled{
+    background: #fff !important;
+}
+
+.edit-button  {
+    margin-left: 30px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 400;
+}
+
+.edit-button:hover{
+    color:#0275d8;
+}
+
+.panel-heading {
+    display: flex;
+}
+
+#update_btn {
+    display: none;
 }
 /* CONTUL MEU - END */
 

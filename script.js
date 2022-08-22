@@ -302,6 +302,18 @@
             });
         });
 
+        /**
+         * Disable input update
+         */
+         $(".update_account").prop('disabled', true);
+
+         $(".edit-button").click(function (e) {
+            $(".update_account").prop('disabled', false);
+            $(".update_account").addClass('focus-border');
+            $("#update_btn").css("display", "block");
+           
+        });
+
     });
 })(jQuery);
 

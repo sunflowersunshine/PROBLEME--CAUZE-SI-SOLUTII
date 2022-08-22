@@ -31,13 +31,19 @@
         </div>
     </div>
 
-    <?php //if(!is_user_logged_in() && !is_page('autentificare') && is_page('inregistrare')) : ?>
+    <?php if(!is_user_logged_in()) : ?>
         <div class="buttons-account">
             Conectează-te
             <a href="<?= get_permalink( get_page_by_title( 'autentificare' ) ); ?>" class="button-account button-account__blue">Autentificare</a>
             <a href="<?= get_permalink( get_page_by_title( 'inregistrare' ) ); ?>" class="button-account button-account__green">Creează cont</a>
         </div>
-    <?php //endif; ?>
+    <?php elseif(is_user_logged_in()) : ?>
+        <div class="buttons-account">
+            Contul meu
+            <a href="<?= get_permalink( get_page_by_title( 'Contul meu' ) ); ?>" class="button-account button-account__blue">Contul meu</a>
+            <a class="button-account button-account__red" href="<?php echo wp_logout_url( home_url() ); ?>">Ieșire din cont</a> 
+        </div>
+    <?php endif; ?>
     
     <footer class="row tm-footer">
         <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 col-xl-12">

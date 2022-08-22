@@ -16,15 +16,15 @@ get_header(); ?>
                 <ul class="tm-tabs">
                     <li class="tm-tab-link-item">
                         <a id="tab1" href="javascript:void(0)" class="tm-tab-link active">
-                            <i class="fa fa-solid fa-folder tm-tab-icon"></i>
-                            <div class="tm-tab-link-label">Postări</div>
+                            <i class="fa fa-solid fa-user tm-tab-icon"></i>
+                            <div class="tm-tab-link-label">Date personale</div>
                         </a>
                     </li>
 
                     <li class="tm-tab-link-item">
                         <a id="tab2" href="javascript:void(0)" class="tm-tab-link">
-                            <i class="fa fa-solid fa-user tm-tab-icon"></i>
-                            <span class="tm-tab-link-label">Date personale</span>
+                        <i class="fa fa-solid fa-folder tm-tab-icon"></i>
+                            <span class="tm-tab-link-label">Postări</span>
                         </a>
                     </li>
                  
@@ -45,7 +45,7 @@ get_header(); ?>
             </nav>
         </div>
         <div class="tm-tab-content-box-col">
-            <div id="tab1C" class="tm-tab-content-box">
+            <div id="tab2C" class="tm-tab-content-box">
                 <div class="tm-tab-content-text">
                 <?php 
                    $args = array(  
@@ -71,7 +71,7 @@ get_header(); ?>
                     </tr>
                    <?php while ( $posts->have_posts()) :  $posts->the_post(); ?>
                      <tr>
-                        <?php $post_id = get_the_ID(); ?>
+                        <?php $post_id = $posts->ID; ?>
                         <td><?php the_title(); ?></td>
                         <td><?= get_post_views($post_id); ?></td>
                         <td><?= get_post_meta( $post_id, 'my-post-likes', true ); ?></td>
@@ -79,30 +79,29 @@ get_header(); ?>
                         <td><?= get_post_meta( $post_id, 'favorite-post', true ); ?></td>
                         <td class="view_post"><a href="<?= the_permalink();?>">Vizualizare <br> postare</a></td>
                         <td class="delete_post"> 
+                        <?php if(current_user_can('delete_post')) :?>
                             <div class="col-sm-12 box-delete btn btn-danger" style="margin-top: 20px;">
-                                <a class="option" onclick="return confirm('Ești sigur că vrei să ștergi <?php the_title();?>')" href="<?= get_delete_post_link( $post_id, '', true ); ?>">
+                                <a class="option" href="<?php echo get_delete_post_link( $post_id ); ?>"  onclick="return confirm('Ești sigur că vrei să ștergi <?php the_title();?> ?')">
                                     <i class="fa fa-trash"></i>
                                     <span class="option-text">Ștergere postare</span>
                                 </a>
                             </div>
+                        <?php endif; ?>
                         </td>
                      </tr>
                     <?php endwhile; ?>
                 </table>
+                <?php else: ?>
+                    <div class="tm-tab-content-text">
+                    <p> Nu sunt postări de afișat!</p>
+                </div>
                 <?php endif; ?>
                 </div>                        
             </div>
 
-            <div id="tab2C" class="tm-tab-content-box">
+            <div id="tab1C" class="tm-tab-content-box">
                 <div class="tm-tab-content-text">
-                    <p>Nam tortor lacus, fringilla nex quam a, volupat laoreet dui. Nunc consequat nulla vel ipsum cursus, eu tempor mauris gravida. Donec sit amet.                         
-                    </p>
-                    <ul class="tm-ul-plus">
-                        <li>Vestibulum ullamcorper et lectus</li>
-                        <li>Donec efficitur placer magna</li>
-                        <li>Praesent venenatis diam pellentesque</li>
-                        <li>Nunc consequat nulla vel ipsum</li>
-                    </ul>
+                    <?= get_template_part("template-parts/form-update-account"); ?>
                 </div>                        
             </div>
 
