@@ -851,6 +851,10 @@ input::-webkit-inner-spin-button {
 #update_btn {
     display: none;
 }
+
+.change-password-form {
+    max-width: 500px;
+}
 /* CONTUL MEU - END */
 
 /* POST TYPE - problema */

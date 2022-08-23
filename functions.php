@@ -1,6 +1,5 @@
 <?php
 
-
 function theme_enqueue_styles() {
     wp_enqueue_style('magnific-styles', get_template_directory_uri() . '/magnific-popup.css');
     wp_enqueue_style('fonts-styles','https://fonts.googleapis.com/css?family=Open+Sans:300,400' );
@@ -29,13 +28,13 @@ function theme_enqueue_styles() {
         wp_localize_script( 'script', 'myAjax', $arr);
 
 }
-
 add_action('wp_enqueue_scripts', 'theme_enqueue_styles');
 
 
 /**
  * THEME SUPPORT
  */
+
 /**
  * Register menus
  */
@@ -46,15 +45,14 @@ add_action('wp_enqueue_scripts', 'theme_enqueue_styles');
         'footer-menu'  => __( 'Meniu Subsol'),
        )
      );
-   }
+}
    add_action( 'init', 'register_my_menus' );
 
-   /**
+
+/**
  * Register sidebar
- */
-
+*/
 add_action( 'widgets_init', 'right_sidebar' );
-
 function right_sidebar() {
   $args = array(
     'name'          => 'Right-Sidebar',
@@ -65,7 +63,6 @@ function right_sidebar() {
     'before_title'  => '<h4 class="widgettitle">',
     'after_title'   => '</h4>' 
   );
-
   register_sidebar( $args );
 }
 
@@ -73,8 +70,6 @@ function right_sidebar() {
  * add feature image support
  */
 add_theme_support( 'post-thumbnails' );
-
-
 
 
 /**
@@ -85,14 +80,14 @@ function add_menu_link_class( $atts, $item, $args ) {
       $atts['class'] = $args->link_class;
     }
     return $atts;
-  }
+}
+add_filter( 'nav_menu_link_attributes', 'add_menu_link_class', 1, 3 );
 
-  add_filter( 'nav_menu_link_attributes', 'add_menu_link_class', 1, 3 );
 
 /**
  * Add a class to a li item-MENU
  */
-  function add_additional_class_on_li($classes, $item, $args) {
+function add_additional_class_on_li($classes, $item, $args) {
     if(isset($args->add_li_class)) {
         $classes[] = $args->add_li_class;
     }
@@ -104,7 +99,6 @@ add_filter('nav_menu_css_class', 'add_additional_class_on_li', 1, 3);
 /**
  * Add class active to the active page-MENU
  */
-
 add_filter('nav_menu_css_class' , 'special_nav_class' , 10 , 2);
 
 function special_nav_class ($classes, $item) {
@@ -113,6 +107,7 @@ function special_nav_class ($classes, $item) {
   }
   return $classes;
 }
+
 
 /**
  * Post-format quote support
@@ -123,10 +118,12 @@ function probleme_post_formats_setup() {
  }
  add_action( 'after_setup_theme', 'probleme_post_formats_setup' );
 
+
 /**
  * Add post thumbnails support
 */
 add_theme_support( 'post-thumbnails');
+
 
 /**
  * Add options acf
@@ -150,290 +147,404 @@ if( function_exists('acf_add_options_page') ) {
 	));
 }
 
-/**
- * START -- VALIDATE FORMS
- */
 
 /**
- * Validate the form trimite problema
- */
-
-function validate_form_trimite_problema() {
-
-  $response_validate = []; 
-  $response_validate['type'] = 'success';
-
-  $errors = [];
-
-  if(!preg_match("/^[a-zA-Z-' ]*$/", $_POST['problema_name'])) {
-    array_push($errors, __('Numele trebuie să conțină doar litere'));
-    $response_validate['type'] = 'error';
-  } 
-
-  if(!preg_match( '/^[A-Za-z .]*$/', $_POST['problema_last_name'])) {
-    array_push($errors, __('Prenumele trebuie să conțină doar litere!', 'probleme-cauze-statistici'));
-    $response_validate['type'] = 'error';
-  }
-
-  if(!is_email($_POST['problema_mail'])) {
-    array_push($errors, __('Adresa de email este invalida!', 'probleme-cauze-statistici'));
-    $response_validate['type'] = 'error';
-  }
-
-  if(!preg_match( '/^(\+4|)?(07[0-8]{1}[0-9]{1}|02[0-9]{2}|03[0-9]{2}){1}?(\s|\.|\-)?([0-9]{3}(\s|\.|\-|)){2}$/', $_POST['problema_phone'])) {
-    array_push($errors, __('Numarul de telefon este invalid!', 'probleme-cauze-statistici'));
-    $response_validate['type'] = 'error';
-  }
-
-  if(empty($_POST['problema_term_id'])) {
-    array_push($errors, __('Nu a fost selectată nici o categorie de probleme!', 'probleme-cauze-statistici'));
-    $response_validate['type'] = 'error';
-  }
-
-  if(!isset($_POST['problema_InputCheckbox'])) {
-    array_push($errors, __('Casuta de acceptare a termenilor si condițiilor nu a fost bifata!', 'probleme-cauze-statistici'));
-    $response_validate['type'] = 'error';
-  }
-
-  $response_validate['messages'] = $errors;
-
-  return $response_validate;
-}
-
-/**
- * Create user if user is not logged in
- */
- function probleme_create_user($username, $name, $email, $phone, $password, $adress) {
-
-    $find_unique_username =  false;
-    $account_trimite_problema= false;
-    $username_unique = $username;
-    $full_name = explode(" ", $name);
-
-    for($i=0; !$find_unique_username; $i++) {
-      if(!username_exists($username_unique)) {
-          $find_unique_username= true;
-      } else {
-          $username_unique = $username . $i;
-      }
-    }
-
-  if($password == false) {
-    $password = wp_generate_password();
-    $account_trimite_problema = true;
-  }
-          
-  $userdata = array(
-      'user_login' =>   $username_unique,
-      'user_pass' => wp_hash_password( $password ),
-      'first_name' =>  $full_name[0],
-      'last_name' => $full_name[1],
-      'display_name' => $name,
-      'user_email' => $email,
-      'role' => 'author',
-      'meta_input' => array(
-        'phone' => $phone,
-        'adress' => $adress,
-    )
-  );
-
-  $user_id = wp_insert_user($userdata);
-
-  $to = $email;
-  $subject = 'Probleme, Cauze, Statistici';
-  if ($account_trimite_problema) {
-        $body = 'Salutare, '. $name .'.  Pentru a trimite o problemă este necesară crearea unui cont!
-      Contul dumneavoastră a fost creat automat când ați trimis problema! Datele contului sunt numele: '.$username_unique.' email: '. $email . ' și parola: ' . $password .'
-      Numai bine!';
-  } else {
-      $body = 'Salutare, ' .$name. 'Felicitări! Contul tău a fost creat cu success!
-      Datele contului sunt numele: '.$username_unique.' email: '. $email . ' și parola: ' . $password .'
-      Numai bine!';
-  }
-
-  wp_mail( $to, $subject, $body);
-
-    if(!is_wp_error($user_id)) 
-    {
-      wp_set_current_user($user_id);
-      wp_set_auth_cookie($user_id);
-      do_action('wp_login', $username_unique);
-    }
-    return $user_id; 
- }
-
- /**
-  *  add USER capabalities to detele posts
-  */
+*  Add user capabalities to detele posts
+*/
+add_action( 'admin_init', 'add_theme_caps');
 function add_theme_caps() {
   $role = get_role( 'author' );
   $role->add_cap('delete_post');
 }
-add_action( 'admin_init', 'add_theme_caps');
 
- /**
-  * Login form function
-  */
 
-add_action( 'admin_post_user_login', 'user_login_function' );
-add_action( 'admin_post_nopriv_user_login', 'user_login_function' );
-  
 
-function user_login_function() {
+/**
+ * Create user
+ */
 
-  $errors = [];
+function probleme_create_user($data) {
 
-    if (isset($_POST['log-in_button']) && wp_verify_nonce($_POST['nonce'], 'userLogin')) {
-
-      $user_email = $_POST['login_email'];
-      $user_password = $_POST['login_password'];
-
-      if ( empty($user_email) && !empty($user_password) ) {
-
-          array_push($errors, __('Email-ul este obligatoriu!'));
-
-      } elseif(!empty($user_email) && empty($user_password)) {
-
-          array_push($errors, __('Parola este obligatorie!'));
-
-      } elseif (empty($user_email) && empty($user_password)) {
-
-          array_push($errors, __('Email-ul și parola sunt obligatorii!'));
-
-      }  elseif(!is_email($user_email )) {
-
-          array_push($errors, __('Adresa de email nu este validă!'));
-
-      } elseif(is_email($user_email) && !email_exists($user_email)) {
-
-          array_push($errors, __('Nu există un cont cu această adresă de email!'));
-
-      } elseif( email_exists($user_email) && !empty($user_password)) {
-
-        $credentials = array();
-        $credentials['user_login'] =  $user_email;
-        $credentials['user_password'] =  $user_password;
-        $credentials['remember'] = true;
-        $user = get_user_by( 'email', $user_email );
-
-        $user = wp_signon($credentials, false);
-        if (is_wp_error($user)) {
-          if(empty($errors)) {
-            array_push($errors, __('Parola este incorectă!'));
-          }
-          $args = add_query_arg( $errors , wp_get_referer() . '?errors='. count($errors). '');
-          wp_redirect($args);
-          exit;
-        } else {
-            wp_set_auth_cookie($user->ID);
-            wp_redirect(get_permalink( get_page_by_title( 'Contul meu' ) ));
-            exit;
-        }
-      } 
-      $args = add_query_arg( $errors , wp_get_referer() . '?errors='. count($errors). '');
-      wp_redirect($args);
+  $find_unique_username =  false;
+  $account_trimite_problema= false;
+  $user_login_name =  $data['first_name']  . $data['last_name']; //create login username
+  $user_name = $data['first_name'] . " ". $data['last_name']; //create user name with space
+  $username_unique = $user_login_name;
+ 
+  for($i=0; !$find_unique_username; $i++) {
+    if(!username_exists($username_unique)) {
+        $find_unique_username= true;
+    } else {
+        $username_unique = $user_login_name . $i;
     }
+  }
+
+if($data['user_password'] == false) {
+  $data['user_password'] = wp_generate_password();
+  $account_trimite_problema = true;
+}
+        
+$userdata = array(
+    'user_login' =>   $username_unique,
+    'user_pass' => wp_hash_password( $data['user_password']),
+    'first_name' =>  $data['first_name'] ,
+    'last_name' => $data['last_name'],
+    'display_name' => $user_name,
+    'user_email' => $data['user_email'],
+    'role' => 'author',
+    'meta_input' => array(
+      'phone' => $data['user_phone'],
+      'adress' => $data['user_adress'],
+  )
+);
+
+$user_id = wp_insert_user($userdata);
+
+$to = $data['user_email'];
+$subject = 'Probleme, Cauze, Statistici';
+if ($account_trimite_problema) {
+      $body = 'Salutare, '. $user_name .'.  Pentru a trimite o problemă este necesară crearea unui cont!
+    Contul dumneavoastră a fost creat automat când ați trimis problema! Datele contului sunt numele: '.$username_unique.' email: '. $data['user_email'] . ' și parola: ' . $data['user_password'] .'
+    Numai bine!';
+} else {
+    $body = 'Salutare, ' .$user_name. 'Felicitări! Contul tău a fost creat cu success!
+    Datele contului sunt numele: '.$username_unique.' email: '. $data['user_email'] . ' și parola: ' . $data['user_password'] .'
+    Numai bine!';
 }
 
+wp_mail( $to, $subject, $body);
 
- /**
-  *  Register form function
-  */
-add_action( 'admin_post_user_register', 'user_register' );
-add_action( 'admin_post_nopriv_user_register', 'user_register' );
+  if(!is_wp_error($user_id)) 
+    if(!is_wp_error($user_id)) 
+  if(!is_wp_error($user_id)) 
+  {
+    wp_set_current_user($user_id);
+    wp_set_auth_cookie($user_id);
+    do_action('wp_login', $username_unique);
+  }
+  return $user_id; 
+    return $user_id; 
+  return $user_id; 
+}
+ 
 
-function user_register() {
+/**
+ * @param array $data
+ * @param String $flag
+ */
+ function user_validate_data($data, $flag) {
 
   $errors = [];
-  if (isset($_POST['sign-up_button']) && wp_verify_nonce($_POST['nonce'], 'userRegister')) {
 
-      $user_first_name = $_POST['sign-up_first-name'];
-      $user_last_name = $_POST['sign-up_last-name'];
-      $user_email = $_POST['sign-up_email'];
-      $user_phone = $_POST['sign-up_phone'];
-      $user_adress = $_POST['sign-up_adress'];
-      $user_password = $_POST['sign-up_password'];
-      $user_confirm_password = $_POST['sign-up_confirm-password'];
+  // Register - variables for checking the password
+  if($flag == "register" || $flag == "change_pass") {
+    $uppercase = preg_match('@[A-Z]@',$data['user_password']);
+    $lowercase = preg_match('@[a-z]@',$data['user_password']);
+    $number    = preg_match('@[0-9]@',$data['user_password']);
+    $specialChars = preg_match('@[^\w]@',$data['user_password']);
+  }
 
-      $uppercase = preg_match('@[A-Z]@',$user_password);
-      $lowercase = preg_match('@[a-z]@',$user_password);
-      $number    = preg_match('@[0-9]@',$user_password );
-      $specialChars = preg_match('@[^\w]@',$user_password);
+ 
+  if(strcmp($flag, 'login') !== 0 && strcmp($flag, 'change_pass') !== 0 ) {
+  // Name and first name
+  if (empty(  $data['first_name'])) {
+    array_push($errors, __('Numele este obligatoriu!'));
+  }
 
-      if (email_exists($user_email)) {
-        array_push($errors, __('Există deja un cont cu această adresă de email!'));
-        $args = add_query_arg( $errors , wp_get_referer() . '?errors='. count($errors). '');
-        wp_redirect($args);
-        exit;
+  if (empty(  $data['last_name'])) {
+    array_push($errors, __('Prenumele este obligatoriu!'));
+  } 
 
-      } else { 
-      if (empty( $user_first_name)) {
-        array_push($errors, __('Numele este obligatoriu!'));
-      }
+  if (((!preg_match("/^[a-zA-Z-' ]*$/", $data['first_name'])) || (!preg_match("/^[a-zA-Z-' ]*$/",  $data['last_name'])))) {
+    array_push($errors, __('Numele și prenumele trebuie să fie formate doar din litere!'));
+  }
 
-      if (empty( $user_last_name)) {
-        array_push($errors, __('Prenumele este obligatoriu!'));
-      } 
+  // Phone
+  if ( empty($data['user_phone'])) {
+    array_push($errors, __('Numărul de telefon este obligatoriu!'));
+  } 
 
-      if ((!preg_match("/^[a-zA-Z-' ]*$/",  $user_first_name)) || (!preg_match("/^[a-zA-Z-' ]*$/",  $user_last_name))  ) {
-        array_push($errors, __('Numele și prenumele trebuie să fie formate doar din litere!'));
-      }
+  if (!preg_match("/^(\+4|)?(07[0-8]{1}[0-9]{1}|02[0-9]{2}|03[0-9]{2}){1}?(\s|\.|\-)?([0-9]{3}(\s|\.|\-|)){2}$/", $data['user_phone'] )) {
+    array_push($errors, __('Numărul de telefon nu este valid!'));
+  } 
 
-      if (empty($user_email)) {
-        array_push($errors, __('Email-ul este obligatoriu!'));
-      } 
+  // Adress
+  if (empty($data['user_adress'])) {
+    array_push($errors, __('Adresa este obligatorie!'));
+  } 
+}
 
-      if (empty($user_phone)) {
-        array_push($errors, __('Numărul de telefon este obligatoriu!'));
-      } 
+  // Email
+  if(strcmp($flag, 'change_pass') !== 0 ) {
+    if (empty($data['user_email'])) {
+      array_push($errors, __('Email-ul este obligatoriu!'));
+    } 
 
-      if (!preg_match("/^(\+4|)?(07[0-8]{1}[0-9]{1}|02[0-9]{2}|03[0-9]{2}){1}?(\s|\.|\-)?([0-9]{3}(\s|\.|\-|)){2}$/",  $user_phone)) {
-        array_push($errors, __('Numărul de telefon nu este valid!'));
-      } 
+    if (!is_email($data['user_email'])) {
+      array_push($errors, __('Adresa de email este invalidă!'));
+    }
+  }
+    // Password
+    if ( empty($data['user_password']) && ($flag == 'register' || $flag =='login' || $flag =='change_pass') ) {
+      array_push($errors, __('Nu ai introdus nici o parolă!'));
+    }
+  
 
-      if (empty($user_adress)) {
-        array_push($errors, __('Adresa este obligatorie!'));
-      } 
 
-      if (empty($user_password) || empty($user_confirm_password) ) {
-        array_push($errors, __('Nu ai introdus nici o parolă!'));
-      }
+    if(strcmp($flag, 'login') !== 0) {
 
-      if(!$uppercase || !$lowercase || !$number || !$specialChars || strlen($user_password) < 8) {
+    if ( empty($data['user_confirm_password']) && ($flag == 'register' || $flag =='login' || $flag =='change_pass' ) ) {
+      array_push($errors, __('Nu ai confirmat parola!'));
+    }
+
+    if($flag == 'register' || $flag =='change_pass' ) {
+      if( !$uppercase || !$lowercase || !$number || !$specialChars || strlen($data['user_password']) < 8) {
         array_push($errors, __('Parola trebuie să fie formată din cel puțin 8 caractere, cel puțin o literă mare și una mică, o cifră, și un caracter special!'));
       } 
 
-      if ($user_password != $user_confirm_password) {
+      if ($data['user_password'] != $data['user_confirm_password']) {
         array_push($errors, __('Parola și confirmarea parolei nu corespund!'));
-      } 
-
-      if (empty($user_email) && !is_email($user_email)) {
-        array_push($errors, __('Adresa de email este invalidă!'));
       }
+    }
 
-      if (empty($errors)) {
+    // Select box trimite problema-form
+    if(empty($data['problema_term_id']) && $flag == 'trimite-problema') {
+      array_push($errors, __('Nu a fost selectată nici o categorie de probleme!'));
+    }
 
-          $user_login =  $user_first_name  . $user_last_name ;
-          $user_name = $user_first_name . " ". $user_last_name ;
-          $user_id =  probleme_create_user($user_login, $user_name, $user_email, $user_phone, $user_password, $user_adress);
+    if(!isset($data['terms_conditions_box']) && ($flag == 'trimite-problema' && $flag == 'register' )) {
+      array_push($errors, __('Casuta de acceptare a termenilor si condițiilor nu a fost bifata!'));
+    }
+  }
+  return $errors;
+
+}
+
+/**
+* Login form function
+*/
+
+add_action( 'admin_post_user_login', 'user_login_function' );
+add_action( 'admin_post_nopriv_user_login', 'user_login_function' );
+
+ function user_login_function() {
   
-          if (!is_wp_error($user_id)) {
-              wp_redirect(get_permalink( get_page_by_title( 'Contul meu' ) ));
-              exit;
-          } else {
-              array_push($errors, __('Ceva nu a funcțtionat corect! Contul nu a fost creat!'));
-              $args = add_query_arg( $errors , wp_get_referer() . '?errors='. count($errors). '');
-              wp_redirect($args);
-              exit;
-          }  
-      } else {
+  $data = [];
+
+  if (isset($_POST['log-in_button']) && wp_verify_nonce($_POST['nonce'], 'userLogin')) {
+
+    $data['user_email'] = $_POST['login_email'];
+    $data['user_password'] = $_POST['login_password'];
+
+    if(is_email($data['user_email']) && !email_exists($data['user_email'])) {
+        $errors = [];
+        array_push($errors, __('Nu există un cont cu această adresă de email!'));
+        $args = add_query_arg( $errors , wp_get_referer() . '?errors='. count($errors). '');
+        wp_redirect($args);
+        exit;
+    } 
+    
+    $login = 'login';
+    $errors = user_validate_data($data, $login); // return array
+
+    if(empty($errors) && !empty($data['user_password'])) {
+
+      $credentials = [];
+      $credentials['user_login'] =  $data['user_email'];
+      $credentials['user_password'] =  $data['user_password'];
+      $credentials['remember'] = true;
+      $user = get_user_by( 'email', $data['user_email']);
+
+      $user = wp_signon($credentials, false);
+
+      if (is_wp_error($user)) {
+
+          array_push($errors, __('Parola este incorectă!'));
           $args = add_query_arg( $errors , wp_get_referer() . '?errors='. count($errors). '');
           wp_redirect($args);
           exit;
+      } else {
+          wp_set_auth_cookie($user->ID);
+          wp_redirect(get_permalink( get_page_by_title( 'Contul meu' ) ));
+          exit;
       }
+    } 
+    $args = add_query_arg( $errors , wp_get_referer() . '?errors='. count($errors). '');
+    wp_redirect($args);
+    exit;
+  }
+  else {
+    die; 
   }
 }
+
+/**
+*  Register form function
+*/
+add_action( 'admin_post_user_register', 'user_register' );
+add_action( 'admin_post_nopriv_user_register', 'user_register' );
+
+ function user_register() {
+
+  $data = [];
+  if (isset($_POST['sign-up_button']) && wp_verify_nonce($_POST['nonce'], 'userRegister')) {
+
+    $data['first_name'] = $_POST['sign-up_first-name'] ?? ''; 
+    $data['last_name'] = $_POST['sign-up_last-name'] ?? '';
+    $data['user_email'] = $_POST['sign-up_email'] ?? '';
+    $data['user_phone'] = $_POST['sign-up_phone'] ?? '';
+    $data['user_adress'] = $_POST['sign-up_adress']?? '';
+    $data['user_password'] = $_POST['sign-up_password'] ?? "";
+    $data['user_confirm_password'] = $_POST['sign-up_confirm-password'] ?? '';
+    $data['terms_conditions_box'] = $_POST['sign-up_checkbox'] ?? '';
+
+    if (email_exists($data['user_email'])) {
+      $errors = [];
+      array_push($errors, __('Există deja un cont cu această adresă de email!'));
+      $args = add_query_arg( $errors , wp_get_referer() . '?errors='. count($errors). '');
+      wp_redirect($args);
+      exit;
+    } 
+
+    $register = 'register';
+    $errors = user_validate_data($data, $register); // return array
+
+    if (empty($errors)) {
+        $user_id =  probleme_create_user($data);
+
+        if (!is_wp_error($user_id)) {
+            wp_redirect(get_permalink( get_page_by_title( 'Contul meu' ) ));
+            exit;
+        } else {
+            array_push($errors, __('Ceva nu a funcționat corect! Contul nu a fost creat!'));
+            $args = add_query_arg( $errors , wp_get_referer() . '?errors='. count($errors). '');
+            wp_redirect($args);
+            exit;
+        }  
+      } else {
+        $args = add_query_arg( $errors , wp_get_referer() . '?errors='. count($errors). '');
+        wp_redirect($args);
+        exit;
+      }
+  } else {
+        die;
+    }
+  }
+    
+
+
+/**
+ * Update information user
+ */
+
+add_action( 'admin_post_user_update_account', 'user_update_account' );
+
+function user_update_account() {
+
+  
+  if (isset($_POST['update_btn']) && wp_verify_nonce($_POST['nonce'], 'userUpdateAccount')) {
+
+    $data['first_name'] = $_POST['myaccount-first_name'];
+    $data['last_name'] = $_POST['myaccount-last_name'];
+    $data['user_email'] = $_POST['myaccount-email'];
+    $data['user_phone'] = $_POST['myaccount-phone'];
+    $data['user_adress'] = $_POST['myaccount-adress'];
+
+    $current_user = wp_get_current_user();
+
+    if(($data['first_name'] != $current_user->user_firstname) || ($data['last_name'] != $current_user->user_lastname) || ($data['user_email'] != $current_user->user_email) || ($data['user_phone'] !=  get_user_meta( $current_user->ID, 'phone' , true )) || ($data['user_adress'] != get_user_meta( $current_user->ID, 'adress' , true ) ) ) {
+    
+      $update = 'update';
+      $errors = user_validate_data($data, $update); // return array
+
+    if (empty($errors)) {
+
+      $user_id = wp_update_user( array(
+        'ID' => $current_user->ID,
+        'first_name' =>  $data['first_name'] ,
+        'last_name' => $data['last_name'],
+        'user_email' => $data['user_email'],
+        'meta_input' => array(
+          'phone' => $data['user_phone'],
+          'adress' => $data['user_adress'],
+          )
+      ));
+
+    if (!is_wp_error($user_id)) {     $success ='Datele au fost actualizate cu success!';
+      $args = get_permalink( get_page_by_title( 'Contul meu' ) ) . '?success='. $success;
+      wp_redirect($args);
+      exit;
+    } else {
+      array_push($errors, __('Ceva nu a funcționat corect! Datele nu au putut fi actualizate!'));
+      $args = add_query_arg( $errors , get_permalink( get_page_by_title( 'Contul meu' ) ). '?errors='. count($errors). '');
+      wp_redirect($args);
+      exit;
+    }  
+    } else {
+        $args = add_query_arg( $errors , get_permalink( get_page_by_title( 'Contul meu' ) ) . '?errors='. count($errors). '');
+        wp_redirect($args);
+        exit;
+    }
+    } else {
+        wp_redirect(get_permalink( get_page_by_title( 'Contul meu' ) ));
+        exit;
+      }
+  } else {
+    exit;
+  }
 }
+
+/**
+ * Change password 
+ */
+add_action( 'admin_post_user_change_password', 'user_change_password' );
+
+function user_change_password() {
+
+  if (isset($_POST['change_pass_button']) && wp_verify_nonce($_POST['nonce'], 'changePassword')) {
+
+    $data['user_old_password'] = $_POST['old_password'];
+    $data['user_password'] = $_POST['new_password'];
+    $data['user_confirm_password'] = $_POST['confirm_new_password'];
+
+    $current_user = wp_get_current_user();
+    
+      $change_pass= 'change_pass';
+      $error = user_validate_data($data, $change_pass); // return array
+      
+      if (!wp_check_password($data['user_old_password'], $current_user->data->user_pass, $current_user->ID)) {
+        array_push($error, __('Parola veche nu corespunde!'));
+    }
+
+    if (empty($error)) {
+
+      wp_set_password($u_pwd, $current_user->ID);
+
+      wp_set_auth_cookie($current_user->ID);
+      do_action('wp_login', $current_user->user_login);
+
+      $to = $current_user->user_email;
+      $subject = 'Probleme, Cauze, Statistici -> schimbare parola';
+      $body = 'Salutare, '. $current_user->last_name .'!  Parola ta a fost schimbată cu success! Parola ta este acum  ' . $data['user_password'] . ' 
+      Numai bine!';
+
+      wp_mail( $to, $subject, $body);
+
+      $success ='Parola a fost actualizată cu succes cu success!';
+      $args = get_permalink( get_page_by_title( 'Contul meu' ) ) . '?succes='. $success;
+      wp_redirect($args);
+      exit;
+      
+    } else {
+        $args = add_query_arg( $error , get_permalink( get_page_by_title( 'Contul meu' ) ) . '?error='. count($error). '');
+        wp_redirect($args);
+        exit;
+    } 
+  } else {
+    exit;
+  }
+}
+
 
 /**
  * Recover password function
@@ -443,52 +554,63 @@ add_action( 'admin_post_nopriv_user_recover_password', 'user_recover_password' )
 
 function user_recover_password() {
   $errors = [];
+
   if (isset($_POST['recover_button']) && wp_verify_nonce($_POST['nonce'], 'userGetPassword')) {
-    global $getPasswordError, $getPasswordSuccess;
+  
+      $user_email = $_POST['user_email'];
 
-    $user_email = trim($_POST['user_email']);
+      if (empty($user_email)) {
+        array_push($errors, __('Adresa de email este obligatorie!'));
+      } elseif (!is_email($user_email)) {
+        array_push($errors, __('Adresa de email este invalida!'));
+      } elseif (!email_exists($user_email)) {
+        array_push($errors, __('Nu există un cont cu această adresă de email!'));
+        exit;
+      } else {
+          $random_password = wp_generate_password();
+          $user = get_user_by('email', $user_email);
 
-    if (empty($user_email)) {
-      array_push($errors, __('Adresa de email este obligatorie!'));
-    } else if (!is_email($user_email)) {
-      array_push($errors, __('Adresa de email este obligatorie!'));
-    } else if (!email_exists($user_email)) {
-      array_push($errors, __('Nu există un cont cu această adresă de email!'));
-    } else {
-        $random_password = wp_generate_password();
-        $user = get_user_by('email', $user_email);
+          $update_user = wp_update_user(array(
+              'ID' => $user->ID,
+              'user_pass' => $random_password
+          ));
 
-        $update_user = wp_update_user(array(
-            'ID' => $user->ID,
-            'user_pass' => $random_password
-                )
-        );
+          if (!is_wp_error($update_user)) {
+              $to = $user_email;
+              $subject = 'Probleme, Cauze, Statistici => Resetare parolă';
+              $sender = get_bloginfo('name');
 
-        if ($update_user) {
-            $to = $user_email;
-            $subject = 'Probleme, Cauze, Statistici => Resetare parolă';
-            $sender = get_bloginfo('name');
+              $message = 'Salutare! Ca urmare a cererii tale parola a fost resetată. Noua ta parolă este ' . $random_password . " Numai bine!";
 
-            $message = 'Salutare! Ca urmare a cererii tale parola a fost resetată. Noua ta parolă este ' . $random_password . "Numai bine!";
+              $mail = wp_mail($to, $subject, $message);
 
-            $mail = wp_mail($to, $subject, $message);
-
-            if ($mail) {
-                $getPasswordSuccess = '<strong>Success! </strong>Check your email address for you new password.';
-               $success ='Parola a fost resetată cu succes! Ti-am trimis un email cu noua parolă!';
-                $args = wp_get_referer() . '?success='. $success;
-                wp_redirect($args);
-                exit;
-            }
-        } else {
-          array_push($errors, __('Ceva nu a funcționat! Parola nu a fost resetată!'));
-          $args = add_query_arg( $errors , wp_get_referer() . '?errors='. count($errors). '');
-          wp_redirect($args);
+              if ($mail) {
+                  $getPasswordSuccess = '<strong>Success! </strong>Check your email address for you new password.';
+                $success ='Parola a fost resetată cu succes! Ti-am trimis un email cu noua parolă!';
+                  $args = wp_get_referer() . '?success='. $success;
+                  wp_redirect($args);
+                  exit;
+              }
+          } else {
+            array_push($errors, __('Ceva nu a funcționat! Parola nu a fost resetată!'));
+            $args = add_query_arg( $errors , wp_get_referer() . '?errors='. count($errors). '');
+            wp_redirect($args);
+            exit;
+          }
         }
+        $args = add_query_arg( $errors , wp_get_referer() . '?errors='. count($errors). '');
+        wp_redirect($args);
+        exit;
+
+    } else {
+         die;
       }
-    }
 }
 
+
+/**
+ * Delete user
+ */
 add_action( 'admin_post_delete_user', 'delete_user' );
 
  function delete_user() {
@@ -508,15 +630,14 @@ add_action( 'admin_post_delete_user', 'delete_user' );
         wp_delete_user( $current_user->ID );
         wp_redirect(home_url());
         exit;
+    } else {
+      die;
     }
-}
+} 
   wp_redirect(wp_get_referer());
   exit;
  }
 
- /**
-  * STOP -- VALIDATE FORMS
-  */
  
 // INSERT POST 
 
@@ -534,9 +655,19 @@ function insert_custom_problem() {
             die('Access denied');
 
         // Perform validation
-        $validation = validate_form_trimite_problema();
+        $data =[];
+        $data['first_name'] = $_POST['problema_name'] ?? '';
+        $data['last_name'] = $_POST['problema_last_name'] ?? '';
+        $data['user_email'] = $_POST['problema_mail'] ?? '' ;
+        $data['user_phone'] = $_POST['problema_phone'] ?? '';
+        $data['user_adress'] = $_POST['problema_address'] ?? '';
+        $data['problema_term_id'] = $_POST['problema_term_id'] ?? '';
+        $data['terms_conditions_box'] =  $_POST['problema_InputCheckbox'] ?? '';
+        $trimite_problema = 'trimite-problema';
 
-        if($validation['type'] == 'success' ) {
+        $validation = user_validate_data($data, $trimite_problema);
+
+        if(empty($validation) ) {
     
             $post_data = array (
               'post_type' => 'problema',
@@ -545,20 +676,14 @@ function insert_custom_problem() {
               'post_status' => 'publish',
             );
 
-            if(!is_user_logged_in() &&  !email_exists($_POST['problema_mail'])) {
-                $user_login = $_POST['problema_name'] . $_POST['problema_last_name'];
-                $user_name = $_POST['problema_name'] . ' ' . $_POST['problema_last_name'];
-                $user_mail = $_POST['problema_mail'];
-                $user_phone = $_POST['problema_phone'];
-                $user_adress = $_POST['problema_address'];
-                $user_id =  problema_create_user($user_login, $user_name , $user_mail, $user_phone, false,  $user_adress);
-
+            if(!is_user_logged_in() &&  !email_exists($data['user_email'])) {
+                $data['user_password'] = false;
+                $user_id =  problema_create_user($data);
                 if($user_id) {
                     $post_data['post_author'] = $user_id;
                 }
-            }
-             else {
-              $user = get_user_by( 'email', $_POST['problema_mail'] );
+            } else {
+              $user = get_user_by( 'email', $data['user_email'] );
               $user_id = $user->ID;
               $post_data['post_author'] = $user_id;
              }
@@ -581,9 +706,6 @@ function insert_custom_problem() {
 
   
             if(!is_wp_error($post_id)) {       
-              
-                $response['message'] = esc_html__('Postarea a fost adăugată cu succes!', 'probleme-cauze-statistici');
-                $response['type'] = 'success';
     
                 $test = wp_set_object_terms( $post_id, intval( $_POST['problema_term_id'] ), 'categorie_problema' );
     
@@ -615,18 +737,17 @@ function insert_custom_problem() {
                 }
     
                 // set_post_thumbnail( $post_id, $attach_id);   
-            }
-            $to = $_POST['problema_mail'];
+            $to = $data['user_email'];
             $subject = 'Probleme, Cauze, Statistici';
             $body = 'Felicitări, problema ta a fost înregistrată cu succes! Mulțumim pentru timpul acordat! Toate cele bune!';
-            wp_mail( $to, $subject, $body, $headers );
-
+            wp_mail( $to, $subject, $body);
 
             wp_redirect(get_permalink($post_id));
+              }
 
         }else{
 
-          $args = add_query_arg( $validation['messages'] , wp_get_referer() . '?errors='. count($validation['messages']). '');
+          $args = add_query_arg( $validation, wp_get_referer() . '?errors='. count($validation). '');
           wp_redirect($args);
         } 
     }
@@ -830,8 +951,9 @@ function my_user_dislike() {
     die();
 }
 
+
 /**
- * Add columns to cpt:probleme to dashboard
+ * Add columns to cpt: probleme to dashboard
  */
 
 add_filter( 'manage_problema_posts_columns', 'problema_posts_columns' );
@@ -841,7 +963,6 @@ function problema_posts_columns( $columns ) {
   $columns['favorite'] = __( 'Postare favorită', 'problema' );
   return $columns;
 }
-
 
 add_action( 'manage_problema_posts_custom_column', 'problema_columns', 10, 2);
 function problema_columns( $column, $post_id ) {
@@ -861,6 +982,7 @@ function problema_columns( $column, $post_id ) {
     echo $favorite  ;
   }
 }
+
 
 /**
  * Order comments fields - mame, email website, comment
@@ -887,6 +1009,7 @@ function comment_fields_custom_order( $fields ) {
     // done ordering, now return the fields:
     return $fields;
 }
+
 
 
 /**
@@ -956,6 +1079,7 @@ function mytheme_comment($comment, $args, $depth) {
 }
 
 
+
 // Guttenberg editor
 function gutenberg_filter( $use_block_editor, $post_type ) {
 	if ( 'post' === $post_type ) {
@@ -964,6 +1088,7 @@ function gutenberg_filter( $use_block_editor, $post_type ) {
 	return $use_block_editor;
 }
 add_filter( 'use_block_editor_for_post_type', 'gutenberg_filter', 10, 2 );
+
 
 
 /**
@@ -977,7 +1102,6 @@ if (!current_user_can('administrator') && !is_admin()) {
 }
 }
 
-
 /**
  * Show number of views
  */
@@ -990,6 +1114,7 @@ function get_post_views($postID){
   }
   return $count;
 }
+
 
 function set_post_views($postID) {
   $count = get_post_meta($postID, 'post_views_count', true);

@@ -1,6 +1,20 @@
 <?php $current_user = wp_get_current_user(); ?>
     <div class="row">
         <div class="col-xs-12 col-sm-12 col-md-9 col-lg-9">
+            
+            <div class="row">
+                    <?php if(isset($_GET['errors'])): ?>
+                        <div class="alert alert-danger" role="alert">
+                        <?php for($i = 0 ; $i < $_GET['errors'] ; $i++) : ?>
+                            <?php echo $_GET[$i];?> <br>
+                            <?php endfor; ?>
+                        </div>
+                    <?php elseif(isset($_GET['success'])) :?>
+                        <div class="alert alert-success" role="alert">
+                            <?php echo $_GET['success'];?> 
+                        </div>
+                    <?php endif; ?>
+            </div>
             <div class="panel panel-primary">
                 <div class="panel-heading">
                 <h3 class="panel-title"><?= $current_user->display_name; ?></h3>
@@ -12,7 +26,8 @@
                         <div class="col-md-3 col-lg-3"> <img alt="User Pic" src="<?= get_avatar_url($current_user-> ID); ?>" class="img-circle img-responsive"> </div>
                         <div class=" col-md-9 col-lg-9 ">
                             <table class="table table-user-information">
-                                <form  action="" >
+                                <form method="POST" action="<?php echo esc_url(admin_url( 'admin-post.php' )); ?>">
+                                <input type="hidden" name="action" value="user_update_account" />
                                 <tr>
                                     <td>Nume:</td>
                                     <td>
@@ -64,7 +79,8 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td><button type="submit" id="update_btn" class="btn btn-info">Salvează modificările</button></td>
+                                <?php wp_nonce_field('userUpdateAccount', 'nonce'); ?>
+                                    <td><button type="submit" id="update_btn" name="update_btn" class="btn btn-info">Salvează modificările</button></td>
                                 </tr>
                                 </form>
                             </table>

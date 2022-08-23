@@ -27,16 +27,23 @@ get_header(); ?>
                             <span class="tm-tab-link-label">Postări</span>
                         </a>
                     </li>
-                 
+
                     <li class="tm-tab-link-item">
                         <a id="tab3" href="javascript:void(0)" class="tm-tab-link">
+                        <i class="fa fa-key tm-tab-icon" aria-hidden="true"></i>
+                            <span class="tm-tab-link-label">Schimbare parolă</span>
+                        </a>
+                    </li>
+                 
+                    <li class="tm-tab-link-item">
+                        <a id="tab4" href="javascript:void(0)" class="tm-tab-link">
                         <i class="fa fa-trash tm-tab-icon"></i>
                             <span class="tm-tab-link-label">Ștergere cont</span>
                         </a>
                     </li>
 
                     <li class="tm-tab-link-item">
-                        <a id="tab4" href="javascript:void(0)" class="tm-tab-link">
+                        <a id="tab5" href="javascript:void(0)" class="tm-tab-link">
                         <i class="fa fa-sign-out tm-tab-icon"></i>
                             <span class="tm-tab-link-label">Ieșire din cont</span>
                         </a>
@@ -45,6 +52,13 @@ get_header(); ?>
             </nav>
         </div>
         <div class="tm-tab-content-box-col">
+
+            <div id="tab1C" class="tm-tab-content-box">
+                    <div class="tm-tab-content-text">
+                        <?= get_template_part("template-parts/form-update-account"); ?>
+                    </div>                        
+            </div>
+        
             <div id="tab2C" class="tm-tab-content-box">
                 <div class="tm-tab-content-text">
                 <?php 
@@ -99,13 +113,13 @@ get_header(); ?>
                 </div>                        
             </div>
 
-            <div id="tab1C" class="tm-tab-content-box">
-                <div class="tm-tab-content-text">
-                    <?= get_template_part("template-parts/form-update-account"); ?>
-                </div>                        
+            <div id="tab3C" class="tm-tab-content-box">
+                    <div class="tm-tab-content-text">
+                        <?= get_template_part("template-parts/form-change-password"); ?>
+                    </div>                        
             </div>
 
-            <div id="tab3C" class="tm-tab-content-box">
+            <div id="tab4C" class="tm-tab-content-box">
                 <div class="tm-tab-content-text">
                     <div class="alert alert-warning" role="alert">
                         <p>Ștergerea contului va avea ca efect ștergerea tuturor postarilor și datelor după trimiterea unei copii ale acestora către dumneavoastră, fără posibilitate de a fi restabilite! Sunteți sigur că doriți să ștergeți contul dumneavoastră?
@@ -114,11 +128,11 @@ get_header(); ?>
                     <form method="POST" action="<?php echo esc_url(admin_url( 'admin-post.php' )); ?>">
                     <input type="hidden" name="action" value="delete_user" />
                     <?php wp_nonce_field('userDelete', 'nonce'); ?>
-                         <button type="submit" name="delete_account_button" id="delete_account_button" class="btn btn-danger">DA, sunt de acord cu ștergerea contului (acțiunea este ireversibilă)</button>
+                         <button type="submit"  onclick="return confirm('Ești sigur că vrei să ștergi permanent contul ?')" name="delete_account_button" id="delete_account_button" class="btn btn-danger">DA, sunt de acord cu ștergerea contului (acțiunea este ireversibilă)</button>
                     </form>
                 </div>                        
             </div>
-            <div id="tab4C" class="tm-tab-content-box">
+            <div id="tab5C" class="tm-tab-content-box">
                 <div class="tm-tab-content-text">
                     <p> Dorești să te te dezautentifici?                       
                     </p>
