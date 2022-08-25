@@ -12,7 +12,9 @@ function theme_enqueue_styles() {
     wp_enqueue_script( 'bootstrap-tether', 'https://npmcdn.com/tether@1.2.4/dist/js/tether.min.js', array(), true);
     wp_enqueue_script( 'bootstrap-cdn-js', 'https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.4/js/bootstrap.min.js', array(), true);
     wp_enqueue_script( 'jquery-magnific-popup', 'https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/jquery.magnific-popup.min.js', array(), true );
+      
     wp_enqueue_script( 'jquery-validator', 'https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.0/jquery.validate.min.js', array(), true);
+    wp_enqueue_media();
    
     
     if (get_post_type() === 'problema' ) {
@@ -186,7 +188,7 @@ if($data['user_password'] == false) {
         
 $userdata = array(
     'user_login' =>   $username_unique,
-    'user_pass' => wp_hash_password( $data['user_password']),
+    'user_pass' => $data['user_password'],
     'first_name' =>  $data['first_name'] ,
     'last_name' => $data['last_name'],
     'display_name' => $user_name,
@@ -441,7 +443,7 @@ add_action( 'admin_post_user_update_account', 'user_update_account' );
 
 function user_update_account() {
 
-  
+   $errors=[];
   if (isset($_POST['update_btn']) && wp_verify_nonce($_POST['nonce'], 'userUpdateAccount')) {
 
     $data['first_name'] = $_POST['myaccount-first_name'];
@@ -452,10 +454,48 @@ function user_update_account() {
 
     $current_user = wp_get_current_user();
 
+        if( isset($_POST['profile_pic']) && current_user_can('author')) { 
+      
+          require_once( ABSPATH . 'wp-admin/includes/image.php' );
+          require_once( ABSPATH . 'wp-admin/includes/file.php' );
+          require_once( ABSPATH . 'wp-admin/includes/media.php' );
+           
+          // $id = media_handle_upload('profile_pic', 0);
+        $wp_filetype = wp_check_filetype( basename($_FILES['profile_pic']['name']), null );
+        $wp_upload_dir = wp_upload_dir(); 
+
+        move_uploaded_file( $_FILES['profile_pic']['tmp_name'], $wp_upload_dir['path'] . '/' . $_FILES['profile_pic']['name']);
+
+          $attachment = [
+            'guid'           => $wp_upload_dir['url'] . '/' . basename($_FILES['profile_pic']['name']), 
+            'post_mime_type' => $wp_filetype['type'],
+            'post_title' => preg_replace( '/\.[^.]+$/', '', basename($_FILES['profile_pic']['name'])),
+            'post_content' => ''
+          ];
+  
+        $path = $wp_upload_dir['path']  . '/' . $_FILES['profile_pic']['name'];
+
+        $attach_id = wp_insert_attachment( $attachment, $path);
+
+        require_once( ABSPATH . 'wp-admin/includes/image.php' );
+
+        $attach_data = wp_generate_attachment_metadata( $attach_id, $path);
+        wp_update_attachment_metadata($attach_id,  $attach_data);
+  
+        $update_profile = update_user_meta( $current_user->ID, 'profile_photo', $id);
+
+        if(!$update_profile) {
+          array_push($errors, __('Imaginea de profil nu a fost actualizata!'));
+        }
+
+  
+      }
+
     if(($data['first_name'] != $current_user->user_firstname) || ($data['last_name'] != $current_user->user_lastname) || ($data['user_email'] != $current_user->user_email) || ($data['user_phone'] !=  get_user_meta( $current_user->ID, 'phone' , true )) || ($data['user_adress'] != get_user_meta( $current_user->ID, 'adress' , true ) ) ) {
     
       $update = 'update';
       $errors = user_validate_data($data, $update); // return array
+
 
     if (empty($errors)) {
 
@@ -479,19 +519,25 @@ function user_update_account() {
       $args = add_query_arg( $errors , get_permalink( get_page_by_title( 'Contul meu' ) ). '?errors='. count($errors). '');
       wp_redirect($args);
       exit;
-    }  
-    } else {
+    } } else {
+        if( $update_profile == true) {
+          $success ='Datele au fost actualizate cu success!';
+          $args = get_permalink( get_page_by_title( 'Contul meu' ) ) . '?success='. $success;
+          wp_redirect($args);
+          exit;
+        } else {
         $args = add_query_arg( $errors , get_permalink( get_page_by_title( 'Contul meu' ) ) . '?errors='. count($errors). '');
         wp_redirect($args);
         exit;
-    }
-    } else {
-        wp_redirect(get_permalink( get_page_by_title( 'Contul meu' ) ));
-        exit;
       }
-  } else {
+    }
+  }  else {
+    wp_redirect(get_permalink( get_page_by_title( 'Contul meu' ) ));
     exit;
   }
+} else {
+  exit;
+}
 }
 
 /**

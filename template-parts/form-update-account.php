@@ -23,10 +23,24 @@
 
                 <div class="panel-body">
                     <div class="row">
-                        <div class="col-md-3 col-lg-3"> <img alt="User Pic" src="<?= get_avatar_url($current_user-> ID); ?>" class="img-circle img-responsive"> </div>
+                    <form  action="<?php echo esc_url(admin_url( 'admin-post.php' )); ?>" method="POST">
+                        <div class="col-md-3 col-lg-3"> 
+
+                            <input type="file" id="profile_pic" name="profile_pic" accept="image/*">
+                            <!-- <label for="profile_pic">Adaugă o fotografie de profil</label> -->
+                            <?php 
+                            $profile_image_id = get_user_meta($current_user->ID,'profile_photo', true);
+                            $profile_image = wp_get_attachment_image($profile_image_id, "full"); ?>
+    
+                        <?php if(!empty($profile_image)) :?>
+                                 <div alt="User Pic" class="img-circle img-responsive"><?=  $profile_image;  ?> </div> 
+                            <?php else: ?>
+                                <img alt="User Pic" src="<?= get_avatar_url($current_user-> ID); ?>" class="img-circle img-responsive"> 
+                            <?php endif;?>
+
+                        </div>
                         <div class=" col-md-9 col-lg-9 ">
                             <table class="table table-user-information">
-                                <form method="POST" action="<?php echo esc_url(admin_url( 'admin-post.php' )); ?>">
                                 <input type="hidden" name="action" value="user_update_account" />
                                 <tr>
                                     <td>Nume:</td>
@@ -83,8 +97,9 @@
                                     <td><button type="submit" id="update_btn" name="update_btn" class="btn btn-info">Salvează modificările</button></td>
                                 </tr>
                                 </form>
-                            </table>
+
                         </div>
+                        </table>
                     </div>
                 </div>
             </div>
